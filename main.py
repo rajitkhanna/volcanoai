@@ -65,7 +65,7 @@ if user_query:
     response = llm.chat.completions.create(
     model="gpt-4",
     messages=[
-        {"role": "system", "content": f"Given the following data {bom.to_json()} {current_stock.to_json()} {incoming_po.to_json()} {safety_stock.to_json()} {supplier_list.to_json()} {usage_forecast.to_json()} answer the following query: {user_query}. List each item as a bullet point."},
+        {"role": "system", "content": f"Given the following data {bom.to_json()} {current_stock.to_json()} {incoming_po.to_json()} {safety_stock.to_json()} {supplier_list.to_json()} {usage_forecast.to_json()} answer the following query: {user_query}. List each item as a bullet point and explain any math that you do."},
         ]
     )
     st.write(response.choices[0].message.content)
