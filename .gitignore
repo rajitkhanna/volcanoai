@@ -2,3 +2,4 @@ env/
 workflow.jpg
 *csv
 *xlsx
+secrets.toml
