@@ -13,60 +13,59 @@ import pandas as pd
 # import requests
 from openai import OpenAI
 
+# st.markdown("""
+#             <style>
+#             footer.st-emotion-cache-cio0dv.ea3mdgi1 {
+#                 display: none;
+#             }
+#             """, unsafe_allow_html=True)
+
 OPENAI_API_KEY = st.secrets["openai"]["api_key"]
 llm = OpenAI(api_key=OPENAI_API_KEY)
 
 st.header("Connect your Data Sources")
-component_data = pd.read_csv("All Components + Supplier Stryker.csv")
-buyer_data = pd.read_csv("Stryker_Buyername_Products.csv", low_memory=False)
+bom = pd.read_csv("data/bom.csv")
+current_stock = pd.read_csv("data/current_stock.csv")
+incoming_po = pd.read_csv("data/incoming_po.csv")
+safety_stock = pd.read_csv("data/safety_stock.csv")
+supplier_list = pd.read_csv("data/supplier_list.csv")
+usage_forecast = pd.read_csv("data/usage_forecast.csv")
 
-with st.expander("Data sources"):
-    st.write(component_data)
-    st.write(buyer_data)
+with st.expander("Bill of Materials"):
+    st.write(bom)
+with st.expander("Current Stock"):
+    st.write(current_stock)
+with st.expander("Incoming PO"):
+    st.write(incoming_po)
+with st.expander("Safety Stock"):
+    st.write(safety_stock)
+with st.expander("Supplier List"):
+    st.write(supplier_list)
+with st.expander("Usage Forecast"):
+    st.write(usage_forecast)
 
 st.header("Query your Procurement Plan")
-user_query = st.text_area("Enter query here", height=150)
+user_query = ""
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("What do I need to order this week?"):
+        user_query = "What do I need to order this week?"
+with col2:
+    if st.button("When is the order from Rajit's Pumps coming?"):
+        user_query = "When is the order from Rajit's Pumps coming?"
+with col3:
+    if st.button("How much have I already ordered from Ben's Motors?"):
+        user_query = "How much have I already ordered from Ben's Motors?"
 
-# st.write(user_query)
+# user_query = st.text_area("Enter query here", value=user_query, height=150)
+
+st.write(f"### User query: {user_query}")
 
 if user_query:
-    component_data_json = component_data.to_json(orient='records')
-    buyer_data_json = buyer_data.to_json(orient='records')
-
     response = llm.chat.completions.create(
     model="gpt-4",
     messages=[
-        {"role": "system", "content": f"Return the person's name from the following prompt and only the name: {user_query}"},
+        {"role": "system", "content": f"Given the following data {bom.to_json()} {current_stock.to_json()} {incoming_po.to_json()} {safety_stock.to_json()} {supplier_list.to_json()} {usage_forecast.to_json()} answer the following query: {user_query}. List each item as a bullet point."},
         ]
     )
-
-    name = response.choices[0].message.content
-
-    response = llm.chat.completions.create(
-    model="gpt-4",
-    messages=[
-        {"role": "system", "content": f"Return the supplier's name from the following prompt and only the name: {user_query}"},
-        ]
-    )
-
-    supplier_name = response.choices[0].message.content
-
-    filtered_df = buyer_data[(buyer_data["Buyer Number_2"] == name) & (buyer_data["Supplier"] == supplier_name.upper())]
-    result = pd.merge(filtered_df, component_data, left_on='Item Number', right_on='Component ID', how='inner')
-
-    # st.write(result)
-
-    response = llm.chat.completions.create(
-    model="gpt-4",
-    messages=[
-        {"role": "system", "content": f"Given the following data {result.to_json()} answer the following query: {user_query}. List each item as a bullet point."},
-        ]
-    )
-
-    # from pprint import pprint
-    # pprint(response)
-
-    query_result = response.choices[0].message.content
-    st.write(query_result)
-
-    
+    st.write(response.choices[0].message.content)
