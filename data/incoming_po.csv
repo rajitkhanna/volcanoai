@@ -1,0 +1,6 @@
+Item ID, Item Name, Stock Due, Arrive Time, Supplier ID
+I0, Pump casing, 20, 1, S0
+I1, Motor, 20, 3, S1
+I2, Control Unit, 0,,
+I3, Tubing, 0,,
+I4, Valve, 0,,

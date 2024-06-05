@@ -1,0 +1,6 @@
+Item ID, Item Name, Supplier ID, Supplier Name, Reorder Quantity, Lead Time 
+I0, Pump casing, S0, Rajit's Pumps, 20, 14
+I1, Motor, S1, Ben's Motors, 20, 7
+I2, Control Unit, S2, Ryan's Controllers, 50, 21
+I3, Tubing, S3, Max's Tubing, 5, 7
+I4, Valve, 100, Alex's Valve Company, 100, 7
