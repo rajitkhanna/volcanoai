@@ -1,6 +1,8 @@
-Item ID, Item Name, Stock Due, Arrive Time, Supplier ID
-I0, Pump casing, 20, 1, S0
-I1, Motor, 20, 3, S1
-I2, Control Unit, 0,,
-I3, Tubing, 0,,
-I4, Valve, 0,,
+Item ID,Item Name,Stock Due,Arrive Time (days),Supplier ID
+I0,Pump casing,20,1,S0
+I0,Pump casing,100,3,S6
+I0,Pump casing,50,13,S5
+I1,Motor,20,3,S1
+I2,Control Unit,0,,
+I3,Tubing,5,4,S4
+I4,Valve,0,,

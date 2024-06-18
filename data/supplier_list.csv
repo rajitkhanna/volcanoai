@@ -1,6 +1,16 @@
-Item ID, Item Name, Supplier ID, Supplier Name, Reorder Quantity, Lead Time 
-I0, Pump casing, S0, Rajit's Pumps, 20, 14
-I1, Motor, S1, Ben's Motors, 20, 7
-I2, Control Unit, S2, Ryan's Controllers, 50, 21
-I3, Tubing, S3, Max's Tubing, 5, 7
-I4, Valve, 100, Alex's Valve Company, 100, 7
+Item ID,Item Name,Supplier ID,Supplier Name,Reorder Quantity,Lead Time (days)
+I0,Pump casing,S0,Rajit's Pumps,20,14
+I0,Pump casing,S5,The Pump Factory,50,14
+I0,Pump casing,S6,Pump and Co,100,10
+I1,Motor,S1,Ben's Motors,20,7
+I1,Motor,S7,The Motor Factory,50,5
+I1,Motor,S8,Motor and Co,100,3
+I2,Control Unit,S2,Ryan's Controllers,50,10
+I2,Control Unit,S9,Control Systems,100,12
+I2,Control Unit,S10,Control Technologies,200,15
+I3,Tubing,S3,Max's Tubing,5,7
+I3,Tubing,S11,Tubing and Co,10,6
+I3,Tubing,S12,The Tubing Factory,20,5
+I4,Valve,S4,Alex's Valve Company,100,7
+I4,Valve,S13,Valve Manufacturing,200,6
+I4,Valve,S14,Valve Co,500,5
