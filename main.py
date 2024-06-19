@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from openai import OpenAI
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import calendar
 from time import sleep
@@ -91,7 +91,7 @@ def get_supplier_information(part_id, supplier_list):
     
     return pd.DataFrame(supplier_info, columns=["Supplier ID", "Supplier Name", "Lead Time (days)", "Reorder Quantity", "Reliability Score"])
 
-# @st.cache_data
+@st.cache_data
 def get_good_until_date(part_id, build_capacity, usage_forecast, safety_stock):
     incoming_po = st.session_state["incoming_po"]
 
@@ -144,19 +144,21 @@ def order(part_id, part_description, supplier_info):
         sleep(5)
         st.rerun()
 
-def get_danger_level(part_id, good_until_date, supplier_list):
-        bail_out_days = supplier_list[supplier_list['Item ID'] == part_id]['Lead Time (days)'].min()
-        days_until_trouble = (good_until_date - datetime.now()).days - bail_out_days
+def get_days_until_trouble(part_id, good_until_date, supplier_list):
+    bail_out_days = supplier_list[supplier_list['Item ID'] == part_id]['Lead Time (days)'].min()
+    days_until_trouble = (good_until_date - datetime.now()).days - bail_out_days
+    return int(days_until_trouble)
 
-        if days_until_trouble < 0:
-            danger_level = 1.0
-        elif days_until_trouble < 7:
-            danger_level = 0.75
-        elif days_until_trouble < 30:
-            danger_level = 0.5
-        else:
-            danger_level = 0.25
-        return danger_level
+def get_danger_level(days_until_trouble):
+    if days_until_trouble < 0:
+        danger_level = 1.0
+    elif days_until_trouble < 7:
+        danger_level = 0.75
+    elif days_until_trouble < 30:
+        danger_level = 0.5
+    else:
+        danger_level = 0.25
+    return danger_level
 
 def get_danger_bar_html(danger_level):
     if danger_level >= 1.0:
@@ -224,14 +226,16 @@ def main():
         part_id = row["Item ID"]
         build_capacity = get_build_capacity(part_id, bom, current_stock, incoming_po)
         good_until_date = get_good_until_date(part_id, build_capacity, usage_forecast, safety_stock)
+        days_until_trouble = get_days_until_trouble(part_id, good_until_date, supplier_list)
+        last_order_date = datetime.now() + timedelta(days=days_until_trouble)
 
         st.write(f"### {row['Description']}")
         description_columns = st.columns([1, 3])
 
         with description_columns[0]:
-            st.write(f"Good until: {good_until_date.strftime('%B %d, %Y')}")
+            st.latex(f"\\text{{Need to order by {last_order_date.strftime('%B %d, %Y')} }} \quad \\text{{(}} {days_until_trouble} \\text{{ days left)}}")
         with description_columns[1]:
-            danger_level = get_danger_level(part_id, good_until_date, supplier_list)
+            danger_level = get_danger_level(days_until_trouble)
             st.markdown(get_danger_bar_html(danger_level), unsafe_allow_html=True)
 
         with st.expander("Supplier Information"):
