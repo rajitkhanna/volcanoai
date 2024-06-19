@@ -91,7 +91,6 @@ def get_supplier_information(part_id, supplier_list):
     
     return pd.DataFrame(supplier_info, columns=["Supplier ID", "Supplier Name", "Lead Time (days)", "Reorder Quantity", "Reliability Score"])
 
-@st.cache_data
 def get_good_until_date(part_id, build_capacity, usage_forecast, safety_stock):
     incoming_po = st.session_state["incoming_po"]
 
@@ -132,7 +131,6 @@ def order(part_id, part_description, supplier_info):
     
     if st.button("Submit Order"):
         st.session_state["incoming_po"].loc[len(st.session_state["incoming_po"])] = [
-            # incoming_po columns
             part_id,
             part_description,
             supplier_info['Reorder Quantity'] * quantity,
