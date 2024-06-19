@@ -28,16 +28,25 @@ def load_data():
     return bom, current_stock, incoming_po, safety_stock, supplier_list, usage_forecast
 
 @st.cache_data
-def handle_user_query(user_query):
-    if user_query == "How many heart pumps are we making this July?":
-        response = "We plan to make 105 heart pumps this July."
+def handle_user_query(user_query, bom, current_stock, incoming_po, safety_stock, supplier_list, usage_forecast):
+    if not user_query:
+        return ""
 
-    elif user_query == "When is the order from Rajit's Pumps coming?":
-        response = "The order from Rajit's Pumps is expected to arrive in 1 day(s)."
-    elif user_query == "How much have I already ordered from Ben's Motors?":
-        response = "You have ordered 20 unit(s) from Ben's Motors."
-    else:
-        response = ""
+    llm = load_model()
+
+    bom_json, current_stock_json, incoming_po_json, safety_stock_json, supplier_list_json, usage_forecast_json = bom.to_json(), current_stock.to_json(), incoming_po.to_json(), safety_stock.to_json(), supplier_list.to_json(), usage_forecast.to_json()
+    
+    context_message = f"You are a helpful assistant here to help someone answer questions about their procurement plan. Here is all of the information you need to know: BOM: {bom_json}, Current Stock: {current_stock_json}, Incoming PO: {incoming_po_json}, Safety Stock: {safety_stock_json}, Supplier List: {supplier_list_json}, Usage Forecast: {usage_forecast_json}"
+    
+    completion = llm.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": context_message},
+            {"role": "user", "content": user_query}
+        ]
+    )
+
+    response = completion.choices[0].message.content
 
     return response
 
@@ -140,6 +149,7 @@ def order(part_id, part_description, supplier_info):
 
         st.success("Order submitted successfully")
         sleep(5)
+        handle_user_query.clear()
         st.rerun()
 
 def get_days_until_trouble(part_id, good_until_date, supplier_list):
@@ -202,19 +212,22 @@ def main():
     if "user_query" not in st.session_state:
         st.session_state["user_query"] = ""
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("How many heart pumps are we making this July?"):
-            st.session_state["user_query"] = "How many heart pumps are we making this July?"
-    with col2:
-        if st.button("When is the order from Rajit's Pumps coming?"):
-            st.session_state["user_query"] = "When is the order from Rajit's Pumps coming?"
-    with col3:
-        if st.button("How much have I already ordered from Ben's Motors?"):
-            st.session_state["user_query"] = "How much have I already ordered from Ben's Motors?"
+    question_columns = st.columns(3)
+
+    q1, q2, q3 = "How many heart pumps are we making this July?", "When is the order from Rajit's Pumps coming?", "How much have I already ordered from Ben's Motors?"
+    with question_columns[0]:
+        if st.button(q1):
+            st.session_state["user_query"] = q1
+    with question_columns[1]:
+        if st.button(q2):
+            st.session_state["user_query"] = q2
+    with question_columns[2] :
+        if st.button(q3):
+            st.session_state["user_query"] = q3
 
     st.write(f"#### User query: {st.session_state['user_query']}")
-    response = handle_user_query(st.session_state["user_query"])
+
+    response = handle_user_query(st.session_state["user_query"], bom, current_stock, st.session_state["incoming_po"], safety_stock, supplier_list, usage_forecast)
 
     st.write(f"#### Response: {response}")
 
@@ -240,23 +253,27 @@ def main():
             supplier_info = get_supplier_information(part_id, supplier_list)
             num_buttons = len(supplier_info)
 
-            col1, col2 = st.columns(2)
+            supplier_table, order_buttons = st.columns(2)
             
-            with col1:
+            with supplier_table:
                 st.table(supplier_info)
 
-            with col2:
+            with order_buttons:
                 for button in range(num_buttons):
                     reliability_score = supplier_info['Reliability Score'].iloc[button]
+                    
                     if reliability_score >= 90:
-                        if st.button(f":green[Order]", help="High reliability score", key=supplier_info['Supplier ID'].iloc[button]):
-                            order(part_id, row["Description"], supplier_info.iloc[button])
+                        button_label = ":green[Order]"
+                        description = "High reliability score"
                     elif reliability_score >= 70:
-                        if st.button(f":orange[Order]", help="Medium reliability score", key=supplier_info['Supplier ID'].iloc[button]):
-                            order(part_id, row["Description"], supplier_info.iloc[button])
+                        button_label = ":orange[Order]"
+                        description = "Medium reliability score"
                     else:
-                        if st.button(f":red[Order]", help="Low reliability score", key=supplier_info['Supplier ID'].iloc[button]):
-                            order(part_id, row["Description"], supplier_info.iloc[button])
+                        button_label = ":red[Order]"
+                        description = "Low reliability score"
+    
+                    if st.button(button_label, help=description, key=supplier_info['Supplier ID'].iloc[button], disabled=datetime.now() + timedelta(days=int(supplier_info.iloc[button]["Lead Time (days)"])) > good_until_date):
+                        order(part_id, row["Description"], supplier_info.iloc[button])
         
 if __name__ == "__main__":
     main()
