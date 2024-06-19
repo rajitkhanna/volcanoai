@@ -36,7 +36,11 @@ def handle_user_query(user_query, bom, current_stock, incoming_po, safety_stock,
 
     bom_json, current_stock_json, incoming_po_json, safety_stock_json, supplier_list_json, usage_forecast_json = bom.to_json(), current_stock.to_json(), incoming_po.to_json(), safety_stock.to_json(), supplier_list.to_json(), usage_forecast.to_json()
     
-    context_message = f"You are a helpful assistant here to help someone answer questions about their procurement plan. Here is all of the information you need to know: BOM: {bom_json}, Current Stock: {current_stock_json}, Incoming PO: {incoming_po_json}, Safety Stock: {safety_stock_json}, Supplier List: {supplier_list_json}, Usage Forecast: {usage_forecast_json}"
+    context_message = f"You are a helpful assistant here to help someone answer questions about their procurement \
+        plan. Here is all of the information you need to know: BOM: {bom_json}, Current Stock: {current_stock_json}, Incoming \
+            PO: {incoming_po_json}, Safety Stock: {safety_stock_json}, Supplier List: {supplier_list_json}, Usage \
+                Forecast: {usage_forecast_json}. Make sure you consider all of the orders that are coming in for a \
+                    for a particular supplier."
     
     completion = llm.chat.completions.create(
         model="gpt-4o",
