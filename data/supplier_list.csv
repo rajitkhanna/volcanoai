@@ -5,8 +5,8 @@ I0,Pump casing,S6,Pump and Co,100,10
 I1,Motor,S1,Ben's Motors,20,7
 I1,Motor,S7,The Motor Factory,50,5
 I1,Motor,S8,Motor and Co,100,3
-I2,Control Unit,S2,Ryan's Controllers,50,7
-I2,Control Unit,S9,Control Systems,100,8
+I2,Control Unit,S2,Ryan's Controllers,50,10
+I2,Control Unit,S9,Control Systems,100,12
 I2,Control Unit,S10,Control Technologies,200,15
 I3,Tubing,S3,Max's Tubing,5,7
 I3,Tubing,S11,Tubing and Co,10,6
